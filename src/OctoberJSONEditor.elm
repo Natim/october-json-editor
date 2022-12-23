@@ -54,7 +54,7 @@ update msg model =
 
                 allTransactions =
                     decodeString decoder jsonString
-                        |> Debug.log "Error"
+                        -- |> Debug.log "Error"
                         |> Result.withDefault []
             in
             ( { model | allTransactions = allTransactions }, Cmd.none )
