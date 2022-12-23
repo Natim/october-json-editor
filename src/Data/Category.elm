@@ -19,7 +19,7 @@ decode : Decoder Category
 decode =
     Decode.succeed Category
         |> optional "subtype" (Decode.maybe Decode.string) Nothing
-        |> optional "type_" (Decode.maybe Decode.string) Nothing
+        |> optional "type" (Decode.maybe Decode.string) Nothing
 
 
 nullableString : Maybe String -> Encode.Value
