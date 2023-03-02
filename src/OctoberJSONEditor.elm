@@ -1,6 +1,7 @@
 module OctoberJSONEditor exposing (main)
 
 import Browser
+import Data.BankStatement as BankStatement exposing (BankStatement)
 import Data.BankTransaction as BankTransaction exposing (BankTransaction)
 import Data.Model exposing (Model)
 import Data.Msg exposing (Msg(..))
@@ -29,7 +30,7 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init flags =
-    ( { allTransactions = [] }, Cmd.none )
+    ( { allTransactions = [], summary = [] }, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -47,17 +48,27 @@ update msg model =
 
         JSONLoaded jsonString ->
             let
-                decoder =
+                transactionsDecoder =
                     BankTransaction.decode
                         |> Decode.list
                         |> Decode.at [ "allTransactions" ]
 
                 allTransactions =
-                    decodeString decoder jsonString
+                    decodeString transactionsDecoder jsonString
+                        -- |> Debug.log "Error"
+                        |> Result.withDefault []
+
+                statementsDecoder =
+                    BankStatement.decode
+                        |> Decode.list
+                        |> Decode.at [ "summary" ]
+
+                allStatements =
+                    decodeString statementsDecoder jsonString
                         -- |> Debug.log "Error"
                         |> Result.withDefault []
             in
-            ( { model | allTransactions = allTransactions }, Cmd.none )
+            ( { model | allTransactions = allTransactions, summary = allStatements }, Cmd.none )
 
         UpdateIBAN bic iban ->
             let
@@ -96,6 +107,10 @@ update msg model =
                         [ ( "allTransactions"
                           , model.allTransactions
                                 |> Encode.list BankTransaction.encode
+                          )
+                        , ( "summary"
+                          , model.summary
+                                |> Encode.list BankStatement.encode
                           )
                         ]
                         |> Encode.encode 4
