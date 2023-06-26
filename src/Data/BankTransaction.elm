@@ -41,11 +41,17 @@ amount transaction =
         euros (transaction.debit * -1)
 
 
+decodeIban : Decoder String
+decodeIban =
+    Decode.maybe Decode.string
+        |> Decode.andThen (Maybe.withDefault "" >> Decode.succeed)
+
+
 decode : Decoder BankTransaction
 decode =
     Decode.succeed BankTransaction
-        |> required "iban" Decode.string
-        |> required "iban" Decode.string
+        |> required "iban" decodeIban
+        |> required "iban" decodeIban
         |> required "bic" Decode.string
         |> required "bic" Decode.string
         |> required "date" Decode.string
